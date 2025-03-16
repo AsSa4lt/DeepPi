@@ -87,5 +87,31 @@ public:
         return result;
     }
 
-    
+    Tensor<T,N> operator-(const Tensor<T,N>& other) const {
+        // Check that the dimensions match
+        assert(_dims == other._dims && "Tensors must have the same dimensions for substraction");
+
+        Tensor<T, N> result(_dims);
+        // Loop over the data in chunks (e.g., using 4 elements at a time for floats)
+        uint64_t size = _data.size();
+        uint64_t i = 0;
+        for (; i + 3 < size; i += 4) {
+            // Load 4 elements from each tensor
+            float32x4_t a = vld1q_f32(&_data[i]);        // Load 4 elements from tensor A
+            float32x4_t b = vld1q_f32(&other._data[i]);  // Load 4 elements from tensor B
+            
+            // Add them
+            float32x4_t c = vsubq_f32(a, b);             // Element-wise addition
+
+            // Store the result back to the result tensor
+            vst1q_f32(&result._data[i], c);              // Store the result
+        }
+
+        // Handle remaining elements if the size is not a multiple of 4
+        for (; i < size; ++i) {
+            result._data[i] = _data[i] - other._data[i];
+        }
+
+        return result;
+    }
 };

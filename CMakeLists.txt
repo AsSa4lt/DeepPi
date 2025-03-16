@@ -13,13 +13,10 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 
 # Create the test executables for each test file.
-add_executable(test_access tests/tensorTests/test_access.cpp)
-add_executable(test_sum tests/tensorTests/test_sum.cpp)
+add_executable(test_tensors tests/tensorTests/test_access.cpp tests/tensorTests/test_sum.cpp tests/tensorTests/test_substraction.cpp)
 
 # Link with GoogleTest and pthread for each test executable.
-target_link_libraries(test_access GTest::GTest GTest::Main pthread)
-target_link_libraries(test_sum GTest::GTest GTest::Main pthread)
+target_link_libraries(test_tensors GTest::GTest GTest::Main pthread)
 
 # Register the tests with CTest.
-add_test(NAME test_access COMMAND test_access)
-add_test(NAME test_contraction COMMAND test_contraction)
+add_test(NAME test_tensors COMMAND test_tensors)
