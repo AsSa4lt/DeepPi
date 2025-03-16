@@ -2,10 +2,10 @@
 #include <array>
 #include <vector>
 #include <stdexcept>
-#include "Tensor.h" 
+#include "Tensor/Tensor.h" 
 
 // Test 1 - Basic Substraction Test
-TEST(TensorSumTest, BasicSubstraction) {
+TEST(TensorSubstractionTest, BasicSubstraction) {
     std::array<uint32_t, 2> dims = {2, 3};
     
     Tensor<float, 2> A(dims);
@@ -30,7 +30,7 @@ TEST(TensorSumTest, BasicSubstraction) {
 }
 
 // Test 2 - Adding Tensors with Different Sizes (Expecting Failure)
-TEST(TensorSumTest, SubstractionDifferentSizes) {
+TEST(TensorSubstractionTest, SubstractionDifferentSizes) {
     std::array<uint32_t, 2> dimsA = {3, 3};
     std::array<uint32_t, 2> dimsB = {2, 3};
     
@@ -43,7 +43,7 @@ TEST(TensorSumTest, SubstractionDifferentSizes) {
 }
 
 // Test 3 - Edge Case: Zero-Sized Tensors
-TEST(TensorSumTest, SubstractionZeroSizedTensor) {
+TEST(TensorSubstractionTest, SubstractionZeroSizedTensor) {
     std::array<uint32_t, 2> dims = {0, 0};
     
     Tensor<float, 2> A(dims);
@@ -53,14 +53,14 @@ TEST(TensorSumTest, SubstractionZeroSizedTensor) {
 }
 
 // Test 4 - Performance
-TEST(TensorSumTest, SubstractionPerformanceTest) {
-    std::array<uint32_t, 2> dims = {1000, 1000};  // Large tensor
+TEST(TensorSubstractionTest, SubstractionPerformanceTest) {
+    std::array<uint32_t, 2> dims = {2048, 2048};  // Large tensor
     
     Tensor<float, 2> A(dims);
     Tensor<float, 2> B(dims);
 
-    for (size_t i = 0; i < 1000; ++i) {
-        for (size_t j = 0; j < 1000; ++j) {
+    for (size_t i = 0; i < 2048; ++i) {
+        for (size_t j = 0; j < 2048; ++j) {
             A(i, j) = 1.0f;
             B(i, j) = 2.0f;
         }

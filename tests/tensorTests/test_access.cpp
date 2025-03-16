@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "Tensor.h" 
+#include "Tensor/Tensor.h" 
 
 // Test that valid access works correctly.
-TEST(TensorTest, ValidAccess) {
+TEST(TensorAccessTest, ValidAccess) {
     // Create a 4D tensor with dimensions 2 x 3 x 4 x 5.
     std::array<uint32_t, 4> dims = {2, 3, 4, 5};
     Tensor<float, 4> tensor(dims);
@@ -16,7 +16,7 @@ TEST(TensorTest, ValidAccess) {
 
 // Test that accessing an invalid index triggers an assert failure.
 // This is a death test, so it will only work when assertions are enabled.
-TEST(TensorTest, OutOfBoundsAccess) {
+TEST(TensorAccessTest, OutOfBoundsAccess) {
     std::array<uint32_t, 4> dims = {2, 3, 4, 5};
     Tensor<float, 4> tensor(dims);
 
