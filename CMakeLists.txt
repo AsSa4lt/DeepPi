@@ -5,13 +5,6 @@ project(DeepPiTests)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Option to build as shared or static library (here we build a static library)
-#add_library(DeepPiLib
-    #src/YourLibraryFile1.cpp
-    #src/YourLibraryFile2.cpp
-    # ... add all your library source files here ...
-#)
-
 # Enable testing.
 enable_testing()
 
@@ -19,11 +12,14 @@ enable_testing()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 
-# Create a test executable.
-add_executable(DeepPiTests  tests/tensorTests/test_access.cpp)
+# Create the test executables for each test file.
+add_executable(test_access tests/tensorTests/test_access.cpp)
+add_executable(test_sum tests/tensorTests/test_sum.cpp)
 
-# Link with GoogleTest and pthread.
-target_link_libraries(DeepPiTests GTest::GTest GTest::Main pthread)
+# Link with GoogleTest and pthread for each test executable.
+target_link_libraries(test_access GTest::GTest GTest::Main pthread)
+target_link_libraries(test_sum GTest::GTest GTest::Main pthread)
 
-# Register the test with CTest.
-add_test(NAME DeepPiTests COMMAND DeepPiTests)
+# Register the tests with CTest.
+add_test(NAME test_access COMMAND test_access)
+add_test(NAME test_contraction COMMAND test_contraction)

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "Tensor.h"  // Your flexible multidimensional tensor class
+#include "Tensor.h" 
 
 // Test that valid access works correctly.
 TEST(TensorTest, ValidAccess) {
