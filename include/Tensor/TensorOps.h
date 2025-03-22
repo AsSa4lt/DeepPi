@@ -39,18 +39,30 @@ namespace TensorOps {
         return A-B;
     }
 
-    template <typename T, uint16_t N>
-    Tensor<T, N> matmul(const Tensor<T,N>& A, const Tensor<T,N>& B){
+    template <typename T, uint16_t N_output, uint16_t N_input1, uint16_t N_input2>
+    Tensor<T, N_output> matmul(const Tensor<T,N_input1>& A, const Tensor<T,N_input2>& B){
         const auto& dimsA = A.getDimensions();
         const auto& dimsB = B.getDimensions();
-        if(N == 1){
+        if constexpr(N_input1 == 1 && N_input2 == 1){
             T resultValue = TensorMatmul::dotproduct(A, B);
-            std::array<uint32_t, 4> dim = { 1 };
-            Tensor<T, N> result(dim);
+            std::array<uint32_t, 1> dim = { 1 };
+            Tensor<T, N_output> result(dim);
             result(0) = resultValue;
             return result;
+        }else if constexpr (N_input1 == N_input2 && N_input1 == 2){
+            return TensorMatmul::matmul2d(A, B);
         }
 
         throw std::logic_error("Not Implemented");
+    }
+
+    template <typename T>
+    Tensor<T, 2> matmul(const Tensor<T,2>& A, const Tensor<T,2>& B){
+        return TensorMatmul::matmul2d(A, B);
+    }
+
+    template<typename T>
+    T matmul(const Tensor<T,1>& A, const Tensor<T,1>& B){
+        return TensorMatmul::dotproduct(A, B);
     }
 };

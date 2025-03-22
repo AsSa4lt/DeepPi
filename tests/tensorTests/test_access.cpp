@@ -14,6 +14,18 @@ TEST(TensorAccessTest, ValidAccess) {
     EXPECT_FLOAT_EQ(tensor(1, 2, 3, 4), 3.14f);
 }
 
+TEST(TensorAccessTest, ValidAccess2DMatrix) {
+    // Create a 4D tensor with dimensions 2 x 3 x 4 x 5.
+    std::array<uint32_t, 2> dims = {3, 5};
+    Tensor<float, 2> tensor(dims);
+
+    // Set a value at a valid index.
+    tensor(2, 4) = 3.14f;
+
+    // Verify that the value is stored and retrieved correctly.
+    EXPECT_FLOAT_EQ(tensor(2, 4), 3.14f);
+}
+
 // Test that accessing an invalid index triggers an assert failure.
 // This is a death test, so it will only work when assertions are enabled.
 TEST(TensorAccessTest, OutOfBoundsAccess) {
