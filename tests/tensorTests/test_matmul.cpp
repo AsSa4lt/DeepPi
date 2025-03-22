@@ -6,22 +6,60 @@
 #include "Tensor/TensorOps.h"
 
 
-// Test case for dotproduct function
-TEST(MatmulTests, DotProductValue) {
+// Test case for dotproduct function float
+TEST(MatmulTests, DotProductValueFloat) {
     // Initialize two simple vectors of size 4
     std::array<uint32_t, 1> dims = {4};
     Tensor<float, 1> A(dims);
     Tensor<float, 1> B(dims);
-
     A.Data = {1.0f, 2.0f, 3.0f, 4.0f};
     B.Data = {4.0f, 3.0f, 2.0f, 1.0f};
-
     // Expected result for the dot product: 1*4 + 2*3 + 3*2 + 4*1 = 20
     float expected = 20.0f;
-
     float result = TensorMatmul::dotproduct(A, B);
-
     EXPECT_FLOAT_EQ(result, expected);
+}
+
+// Test case for dotproduct function uint32_t
+TEST(MatmulTests, DotProductValueU32) {
+    // Initialize two simple vectors of size 4
+    std::array<uint32_t, 1> dims = {4};
+    Tensor<uint32_t, 1> A(dims);
+    Tensor<uint32_t, 1> B(dims);
+    A.Data = {1, 2, 3, 4};
+    B.Data = {4, 3, 2, 1};
+    // Expected result for the dot product: 1*4 + 2*3 + 3*2 + 4*1 = 20
+    uint32_t expected = 20;
+    uint32_t result = TensorMatmul::dotproduct(A, B);
+    EXPECT_EQ(result, expected);
+}
+
+// Test case for dotproduct function uint16_t
+TEST(MatmulTests, DotProductValueU16) {
+    // Initialize two simple vectors of size 4
+    std::array<uint32_t, 1> dims = {4};
+    Tensor<uint16_t, 1> A(dims);
+    Tensor<uint16_t, 1> B(dims);
+    A.Data = {1, 2, 3, 4};
+    B.Data = {4, 3, 2, 1};
+    // Expected result for the dot product: 1*4 + 2*3 + 3*2 + 4*1 = 20
+    uint32_t expected = 20;
+    uint32_t result = TensorMatmul::dotproduct(A, B);
+    EXPECT_EQ(result, expected);
+}
+
+// Test case for dotproduct function uint8_t
+TEST(MatmulTests, DotProductValueU8) {
+    // Initialize two simple vectors of size 4
+    std::array<uint32_t, 1> dims = {4};
+    Tensor<uint8_t, 1> A(dims);
+    Tensor<uint8_t, 1> B(dims);
+    A.Data = {1, 2, 3, 4};
+    B.Data = {4, 3, 2, 1};
+    // Expected result for the dot product: 1*4 + 2*3 + 3*2 + 4*1 = 20
+    uint32_t expected = 20;
+    uint32_t result = TensorMatmul::dotproduct(A, B);
+    EXPECT_EQ(result, expected);
 }
 
 // Test case for dotproduct function
