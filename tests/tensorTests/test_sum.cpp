@@ -1,11 +1,13 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <array>
 #include <vector>
 #include <stdexcept>
 #include "Tensor/Tensor.h" 
+#include "Tensor/TensorOps.h"
 
 // Test 1 - Basic Sum Test
-TEST(TensorSumTest, BasicSum) {
+TEST(TensorSumTest, BasicSumFloat) {
     std::array<uint32_t, 2> dims = {2, 3};
     
     Tensor<float, 2> A(dims);
@@ -31,7 +33,7 @@ TEST(TensorSumTest, BasicSum) {
 
 
 // Test 2 - Adding Tensors with Different Sizes (Expecting Failure)
-TEST(TensorSumTest, SumDifferentSizes) {
+TEST(TensorSumTest, SumDifferentSizesFloat) {
     std::array<uint32_t, 2> dimsA = {3, 3};
     std::array<uint32_t, 2> dimsB = {2, 3};
     
@@ -44,7 +46,7 @@ TEST(TensorSumTest, SumDifferentSizes) {
 }
 
 // Test 3 - Edge Case: Zero-Sized Tensors
-TEST(TensorSumTest, SumZeroSizedTensor) {
+TEST(TensorSumTest, SumZeroSizedTensorFloat) {
     std::array<uint32_t, 2> dims = {0, 0};
     
     Tensor<float, 2> A(dims);
@@ -54,7 +56,7 @@ TEST(TensorSumTest, SumZeroSizedTensor) {
 }
 
 // Test 4 - Performance
-TEST(TensorSumTest, SumPerformanceTest) {
+TEST(TensorSumTest, SumPerformanceTestFloat) {
     std::array<uint32_t, 2> dims = {2048, 2048};  // Large tensor
     
     Tensor<float, 2> A(dims);
@@ -75,4 +77,44 @@ TEST(TensorSumTest, SumPerformanceTest) {
     std::cout << "Tensor sum performance test took " << duration.count() << " ms" << std::endl;
 }
 
+// Test 5 Test for uint32
+TEST(TensorSumTest, BasicSumUint32) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint32_t, 2> A = TensorOps::full<uint32_t, 2>(dims, 5);
+    Tensor<uint32_t, 2> B = TensorOps::full<uint32_t, 2>(dims, 7);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint32_t, 2> C = A + B;
+    // Verify results
+    EXPECT_EQ(12, C(0,0));
+    EXPECT_EQ(18, C(0,2));
+}
 
+// Test 6 Test for uint16
+TEST(TensorSumTest, BasicSumUint16) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint16_t, 2> A = TensorOps::full<uint16_t, 2>(dims, 5);
+    Tensor<uint16_t, 2> B = TensorOps::full<uint16_t, 2>(dims, 7);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint16_t, 2> C = A + B;
+    // Verify results
+    EXPECT_EQ(12, C(0,0));
+    EXPECT_EQ(18, C(0,2));
+}
+
+// Test 7 Test for uint16
+TEST(TensorSumTest, BasicSumUint8) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint8_t, 2> A = TensorOps::full<uint8_t, 2>(dims, 5);
+    Tensor<uint8_t, 2> B = TensorOps::full<uint8_t, 2>(dims, 7);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint8_t, 2> C = A + B;
+    // Verify results
+    EXPECT_EQ(12, C(0,0));
+    EXPECT_EQ(18, C(0,2));
+}

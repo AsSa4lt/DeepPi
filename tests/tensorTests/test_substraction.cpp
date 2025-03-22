@@ -1,8 +1,10 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <array>
 #include <vector>
 #include <stdexcept>
 #include "Tensor/Tensor.h" 
+#include "Tensor/TensorOps.h"
 
 // Test 1 - Basic Substraction Test
 TEST(TensorSubstractionTest, BasicSubstraction) {
@@ -72,4 +74,46 @@ TEST(TensorSubstractionTest, SubstractionPerformanceTest) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
     std::cout << "Tensor substraction performance test took " << duration.count() << " ms" << std::endl;
+}
+
+// Test 5 Test for uint32
+TEST(TensorSumTest, BasicSubstractionUint32) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint32_t, 2> A = TensorOps::full<uint32_t, 2>(dims, 7);
+    Tensor<uint32_t, 2> B = TensorOps::full<uint32_t, 2>(dims, 5);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint32_t, 2> C = A - B;
+    // Verify results
+    EXPECT_EQ(2, C(0,0));
+    EXPECT_EQ(6, C(0,2));
+}
+
+// Test 6 Test for uint16
+TEST(TensorSumTest, BasicSubstractionUint16) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint16_t, 2> A = TensorOps::full<uint16_t, 2>(dims, 7);
+    Tensor<uint16_t, 2> B = TensorOps::full<uint16_t, 2>(dims, 5);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint16_t, 2> C = A - B;
+    // Verify results
+    EXPECT_EQ(2, C(0,0));
+    EXPECT_EQ(6, C(0,2));
+}
+
+// Test 6 Test for uint16
+TEST(TensorSumTest, BasicSubstractionUint8) {
+    std::array<uint32_t, 2> dims = {2, 3};
+    Tensor<uint8_t, 2> A = TensorOps::full<uint8_t, 2>(dims, 7);
+    Tensor<uint8_t, 2> B = TensorOps::full<uint8_t, 2>(dims, 5);
+    // set one number to be different
+    A(0, 2) = 11;
+    // Perform the sum
+    Tensor<uint8_t, 2> C = A - B;
+    // Verify results
+    EXPECT_EQ(2, C(0,0));
+    EXPECT_EQ(6, C(0,2));
 }

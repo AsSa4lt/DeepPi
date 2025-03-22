@@ -11,14 +11,16 @@ namespace TensorOps {
     template <typename T, uint16_t N> 
     Tensor<T, N> zeroes(const std::array<uint32_t, N>& dims) {
         Tensor<T, N> result(dims);
-        result.fillWithValues(0);
+        T value = 0;
+        result.fillWithValues(value);
         return result;
     }
 
     template <typename T, uint16_t N> 
     Tensor<T, N> ones(const std::array<uint32_t, N>& dims) {
         Tensor<T, N> result(dims);
-        result.fillWithValues(1);
+        T value = 1;
+        result.fillWithValues(value);
         return result;
     }
 

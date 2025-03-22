@@ -17,8 +17,8 @@ namespace TensorMatmul {
         // Loop over data in chunks of 4
         for (; i + 3 < A.Data.size(); i += 4) {
             // Load 4 elements from each tensor A and B
-            float32x4_t a = vld1q_f32(&A.Data[i]);        // Load 4 elements from tensor A
-            float32x4_t b = vld1q_f32(&B.Data[i]);        // Load 4 elements from tensor B
+            float32x4_t a = vld1q_f32(&A(i));        // Load 4 elements from tensor A
+            float32x4_t b = vld1q_f32(&B(i));        // Load 4 elements from tensor B
     
             // Multiply corresponding elements of A and B
             float32x4_t prod = vmulq_f32(a, b);           // Element-wise multiplication
@@ -33,7 +33,7 @@ namespace TensorMatmul {
     
         // Handle any remaining elements (less than 4 elements left)
         for (; i < A.Data.size(); ++i) {
-            result += A.Data[i] * B.Data[i];
+            result += A(i) * B(i);
         }
     
         return result;
@@ -62,12 +62,12 @@ namespace TensorMatmul {
                     float32x4_t a_vec = vdupq_n_f32(a_val);
                     // Load 4 contiguous floats from row k of B, starting at column j.
                     // Since B is row-major, row k starts at index k*K.
-                    float32x4_t b_vec = vld1q_f32(&B.Data[k * K_dim + j]);
+                    float32x4_t b_vec = vld1q_f32(&B(k,j));
                     // Accumulate: sum += a_vec * b_vec
                     sum = vmlaq_f32(sum, a_vec, b_vec);
                 }
                 // Store the computed 4 floats back into matrixC
-                vst1q_f32(&result.Data[i * K_dim + j], sum);
+                vst1q_f32(&result(i, j), sum);
             }
             for(; j < K_dim; j+=1){
                 float sum = 0;
