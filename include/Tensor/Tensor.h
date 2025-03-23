@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sys/types.h>
 #include <type_traits>
 #include <vector>
 #include <array>
@@ -114,6 +115,97 @@ public:
         return _dims;
     }
 
+    Tensor<T, 2> LeftTopPart() const{
+        uint32_t M_m = this->_dims[0]/2;
+        uint32_t N_m = this->_dims[1]/2;
+        std::array<uint32_t, 2> dims = {M_m, N_m};
+        Tensor<T, 2> leftTopPart(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                leftTopPart(i, j) = Data[i * this->_dims[1] + j];
+            }
+        }
+        return leftTopPart;
+    }
+
+    void FillLeftTopPart(Tensor<T, 2> leftTopPart){
+        uint32_t M_m = leftTopPart.getDimensions()[0];
+        uint32_t N_m = leftTopPart.getDimensions()[1];
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                Data[i * this->_dims[1] + j] = leftTopPart(i, j);
+            }
+        }
+    }
+
+    Tensor<T, 2> RightTopPart() const {
+        uint32_t M_m = this->_dims[0]/2;
+        uint32_t N_m = this->_dims[1] - this->_dims[1]/2;
+        std::array<uint32_t, 2> dims = {M_m, N_m};
+        Tensor<T, 2> rightTopPart(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                rightTopPart(i, j) = Data[i * this->_dims[1] + j + this->_dims[1]/2];
+            }
+        }
+        return rightTopPart;
+    }
+
+    void FillRightTopPart(Tensor<T, 2> rightTopPart){
+        uint32_t M_m = rightTopPart.getDimensions()[0];
+        uint32_t N_m = rightTopPart.getDimensions()[1];
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                Data[i * this->_dims[1] + j + this->_dims[1]/2] = rightTopPart(i, j);
+            }
+        }
+    }
+
+    Tensor<T, 2> LeftBottomPart() const {
+        uint32_t M_m = this->_dims[0] - this->_dims[0]/2;
+        uint32_t N_m = this->_dims[1]/2;
+        std::array<uint32_t, 2> dims = {M_m, N_m};
+        Tensor<T, 2> leftBottomPart(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                leftBottomPart(i, j) = Data[(i + this->_dims[0]/2) * this->_dims[1] + j];
+            }
+        }
+        return leftBottomPart;
+    }
+
+    void FillLeftBottomPart(Tensor<T, 2> leftBottomPart){
+        uint32_t M_m = leftBottomPart.getDimensions()[0];
+        uint32_t N_m = leftBottomPart.getDimensions()[1];
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                Data[(i + this->_dims[0]/2) * this->_dims[1] + j] = leftBottomPart(i, j);
+            }
+        }
+    }
+
+    Tensor<T, 2> RightBottomPart() const {
+        uint32_t M_m = this->_dims[0] - this->_dims[0]/2;
+        uint32_t N_m = this->_dims[1] - this->_dims[1]/2;
+        std::array<uint32_t, 2> dims = {M_m, N_m};
+        Tensor<T, 2> rightBottomPart(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                rightBottomPart(i, j) = Data[(i + this->_dims[0]/2) * this->_dims[1] + j + this->_dims[1]/2];
+            }
+        }
+        return rightBottomPart;
+    }
+
+    void FillRightBottomPart(Tensor<T, 2> rightBottomPart){
+        uint32_t M_m = rightBottomPart.getDimensions()[0];
+        uint32_t N_m = rightBottomPart.getDimensions()[1];
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                Data[(i + this->_dims[0]/2) * this->_dims[1] + j + this->_dims[1]/2] = rightBottomPart(i, j);
+            }
+        }
+    }
 
 
     Tensor<uint32_t, N> operator+(const Tensor<uint32_t, N>& other) const {
@@ -247,5 +339,13 @@ public:
         return result;
     }
 
+    // to string
+    std::string toString() const {
+        std::string str = "";
+        for (int i = 0; i < Data.size(); i++) {
+            str += std::to_string(Data[i]) + " ";
+        }
+        return str;
+    }
     
 };

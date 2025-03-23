@@ -111,7 +111,7 @@ uint32_t TensorMatmul::dotproduct(const Tensor<uint8_t, 1> &A, const Tensor<uint
     return result;
 }
 
-Tensor<float, 2> TensorMatmul::matmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B){
+Tensor<float, 2> TensorMatmul::naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B){
     const auto& dimsA = A.getDimensions();
     const auto& dimsB = B.getDimensions();
     assert(dimsA[1] == dimsB[0] && "For 2D matrix multiplication matrices need to have shapes M*N and N*K");
@@ -122,7 +122,7 @@ Tensor<float, 2> TensorMatmul::matmul2d(const Tensor<float, 2>& A, const Tensor<
     Tensor<float, 2> result(dims); 
     for(int i = 0; i < M_dim; i++){
         int j = 0;
-        for(; j+3 < K_dim; j+=4){
+        for(; j+3 < K_dim; j+=4){ 
             // Initialize sum vector for 4 elements of row i of C
             float32x4_t sum = vdupq_n_f32(0.0f);
             for(int k = 0; k < N_dim; k++){

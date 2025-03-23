@@ -109,7 +109,7 @@ TEST(MatmulTests, Matmul2DWrongDimenstion){
     auto B = TensorOps::full<float, 2>(dimsB, 23.0f);
     EXPECT_DEATH({
         TensorMatmul::matmul2d(A, B);
-    }, "need to have shapes");
+    }, "must have shapes");
 }
 
 TEST(MatmulTests, MatmullCallVectorsMainFunc){
@@ -173,7 +173,7 @@ TEST(MatmulTests, MatmullCall2DMatricesMainFunc){
     }
 }
 
-TEST(TensorSumTest, MatmulerformanceTestFloat) {
+TEST(TensorSumTest, MatmulPerformanceTestFloat) {
     uint32_t N = 128;
     uint32_t M = 1024;
     uint32_t K = 2048;
@@ -193,5 +193,36 @@ TEST(TensorSumTest, MatmulerformanceTestFloat) {
     
     std::cout << "Tensor multiplication performance test took " << duration.count() << " ms" << std::endl;
     std::cout << "Performance is " << N * M * K / duration.count() / 1e6 << " GFLOPs" << std::endl;
+}
 
+TEST(TensorSumTest, TestMatmulAlgorithm) {
+    uint32_t N = 128;
+    uint32_t M = 1024;
+    uint32_t K = 2048;
+    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
+    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+
+    auto A = TensorOps::full<float, 2>(dimsA, 2.0f);
+    auto B = TensorOps::full<float, 2>(dimsB, 2.0f);
+    auto C = TensorMatmul::matmul2d<float>(A, B);
+
+    EXPECT_FLOAT_EQ(C(0, 0), 4096.0f);
+    EXPECT_FLOAT_EQ(C(10, 10), 4096.0f);
+    EXPECT_FLOAT_EQ(C(110, 110), 4096.0f);
+}
+
+TEST(TensorSumTest, TestMatmulAlgorithmEven) {
+    uint32_t N = 131;
+    uint32_t M = 255;
+    uint32_t K = 666;
+    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
+    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+
+    auto A = TensorOps::full<float, 2>(dimsA, 2.0f);
+    auto B = TensorOps::full<float, 2>(dimsB, 2.0f);
+    auto C = TensorMatmul::matmul2d<float>(A, B);
+
+    EXPECT_FLOAT_EQ(C(0, 0), 1020.0f);
+    EXPECT_FLOAT_EQ(C(10, 10), 1020.0f);
+    EXPECT_FLOAT_EQ(C(110, 110), 1020.0f);
 }
