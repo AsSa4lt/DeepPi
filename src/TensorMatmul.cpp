@@ -2,6 +2,9 @@
 #include <arm_neon.h>
 #include <cstdint>
 
+/**
+* @brief Computes the dot product of two single-precision floating point tensors with SIMD operations
+*/
 float TensorMatmul::dotproduct(const Tensor<float, 1> &A, const Tensor<float, 1> &B){
     // Check that A and B have the same size
     assert(A.Data.size() == B.Data.size() && "Vectors must have the same dimensions");
@@ -26,6 +29,9 @@ float TensorMatmul::dotproduct(const Tensor<float, 1> &A, const Tensor<float, 1>
     return result;
 }
 
+/**
+* @brief Computes the dot product of two 32-bit unsigned integer tensors tensors with SIMD operations
+*/
 uint32_t TensorMatmul::dotproduct(const Tensor<uint32_t, 1> &A, const Tensor<uint32_t, 1> &B){
     // Check that A and B have the same size
     assert(A.Data.size() == B.Data.size() && "Vectors must have the same dimensions");
@@ -50,6 +56,9 @@ uint32_t TensorMatmul::dotproduct(const Tensor<uint32_t, 1> &A, const Tensor<uin
     return result;
 }
 
+/**
+* @brief Computes the dot product of two 16-bit unsigned integer tensors tensors with SIMD operations
+*/
 uint32_t TensorMatmul::dotproduct(const Tensor<uint16_t, 1> &A, const Tensor<uint16_t, 1> &B){
     // Check that A and B have the same size
     assert(A.Data.size() == B.Data.size() && "Vectors must have the same dimensions");
@@ -74,6 +83,9 @@ uint32_t TensorMatmul::dotproduct(const Tensor<uint16_t, 1> &A, const Tensor<uin
     return result;
 }
 
+/**
+* @brief Computes the dot product of two 8-bit unsigned integer tensors tensors with SIMD operations
+*/
 uint32_t TensorMatmul::dotproduct(const Tensor<uint8_t, 1> &A, const Tensor<uint8_t, 1> &B){
     // Check that A and B have the same size
     assert(A.Data.size() == B.Data.size() && "Vectors must have the same dimensions");
@@ -95,6 +107,44 @@ uint32_t TensorMatmul::dotproduct(const Tensor<uint8_t, 1> &A, const Tensor<uint
     }
     for (; i < A.Data.size(); ++i) {
         result += A(i) * B(i);
+    }
+    return result;
+}
+
+Tensor<float, 2> TensorMatmul::matmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B){
+    const auto& dimsA = A.getDimensions();
+    const auto& dimsB = B.getDimensions();
+    assert(dimsA[1] == dimsB[0] && "For 2D matrix multiplication matrices need to have shapes M*N and N*K");
+    uint32_t M_dim = dimsA[0];
+    uint32_t N_dim = dimsA[1];
+    uint32_t K_dim = dimsB[1];
+    std::array<uint32_t, 2> dims = {M_dim, K_dim};
+    Tensor<float, 2> result(dims); 
+    for(int i = 0; i < M_dim; i++){
+        int j = 0;
+        for(; j+3 < K_dim; j+=4){
+            // Initialize sum vector for 4 elements of row i of C
+            float32x4_t sum = vdupq_n_f32(0.0f);
+            for(int k = 0; k < N_dim; k++){
+                // Load A(i,k) and broadcast it into a vector.
+                float a_val = A(i, k);
+                float32x4_t a_vec = vdupq_n_f32(a_val);
+                // Load 4 contiguous floats from row k of B, starting at column j.
+                // Since B is row-major, row k starts at index k*K.
+                float32x4_t b_vec = vld1q_f32(&B(k,j));
+                // Accumulate: sum += a_vec * b_vec
+                sum = vmlaq_f32(sum, a_vec, b_vec);
+            }
+            // Store the computed 4 floats back into matrixC
+            vst1q_f32(&result(i, j), sum);
+        }
+        for(; j < K_dim; j+=1){
+            float sum = 0;
+            for(int k = 0; k < N_dim; k++){
+                sum += A(i,k) * B(k, j);
+            }
+            result(i, j) = sum;
+        }
     }
     return result;
 }

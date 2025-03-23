@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <array>
+#include <iostream>
 #include <vector>
 #include <stdexcept>
 #include "Tensor/TensorOps.h"
@@ -170,4 +171,27 @@ TEST(MatmulTests, MatmullCall2DMatricesMainFunc){
             EXPECT_FLOAT_EQ(1265.0f, result(i,j));
         }
     }
+}
+
+TEST(TensorSumTest, MatmulerformanceTestFloat) {
+    uint32_t N = 128;
+    uint32_t M = 1024;
+    uint32_t K = 2048;
+    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
+    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+
+    auto A = TensorOps::full<float, 2>(dimsA, 11.0f);
+    auto B = TensorOps::full<float, 2>(dimsB, 23.0f);
+    int num_iterations = 10;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    for(int i = 0; i < num_iterations; i++){
+        Tensor<float, 2> C = TensorOps::matmul(A, B);
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>((end - start) / num_iterations);
+    
+    std::cout << "Tensor multiplication performance test took " << duration.count() << " ms" << std::endl;
+    std::cout << "Performance is " << N * M * K / duration.count() / 1e6 << " GFLOPs" << std::endl;
+
 }
