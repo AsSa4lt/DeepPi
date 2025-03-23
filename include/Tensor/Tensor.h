@@ -207,6 +207,35 @@ public:
         }
     }
 
+    Tensor<T, 2> ExtendToDivisibleBy2(){
+        uint32_t M_m = this->_dims[0];
+        uint32_t N_m = this->_dims[1];
+        if (M_m % 2 == 0 && N_m % 2 == 0){
+            return *this;
+        }
+        uint32_t M_m_new = M_m % 2 == 0 ? M_m : M_m + 1;
+        uint32_t N_m_new = N_m % 2 == 0 ? N_m : N_m + 1;
+        std::array<uint32_t, 2> dims = {M_m_new, N_m_new};
+        Tensor<T, 2> extendedTensor(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                extendedTensor(i, j) = Data[i * this->_dims[1] + j];
+            }
+        }
+        return extendedTensor;
+    }
+
+    Tensor<T, 2> CutToDimensions(uint32_t M_m, uint32_t N_m){
+        std::array<uint32_t, 2> dims = {M_m, N_m};
+        Tensor<T, 2> cutTensor(dims);
+        for (int i = 0; i < M_m; i++){
+            for (int j = 0; j < N_m; j++){
+                cutTensor(i, j) = Data[i * this->_dims[1] + j];
+            }
+        }
+        return cutTensor;
+    }
+
 
     Tensor<uint32_t, N> operator+(const Tensor<uint32_t, N>& other) const {
         assert(_dims == other._dims && "Tensors must have the same dimensions for addition");

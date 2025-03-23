@@ -94,19 +94,28 @@ namespace TensorMatmul {
         // Or if matrices are small
         if (dimsA[0] * dimsA[1] * dimsB[1] < 512)
             return naivematmul2d(A, B);
-        if (dimsA[0] % 2 == 1 || dimsA[1] % 2 == 1 || dimsB[1] % 2 == 1)
-            return naivematmul2d(A, B);
-        
+
         std::array<uint32_t, 2> dims = {M_dim, K_dim};
         Tensor<T, 2> result{dims};
-        Tensor<T, 2> A11 = A.LeftTopPart();
-        Tensor<T, 2> A12 = A.RightTopPart();
-        Tensor<T, 2> A21 = A.LeftBottomPart();
-        Tensor<T, 2> A22 = A.RightBottomPart();
-        Tensor<T, 2> B11 = B.LeftTopPart();
-        Tensor<T, 2> B12 = B.RightTopPart();
-        Tensor<T, 2> B21 = B.LeftBottomPart();
-        Tensor<T, 2> B22 = B.RightBottomPart();
+        // Set "correct matrices"
+        Tensor<T, 2> A_div2 = A;
+        Tensor<T, 2> B_div2 = B;
+
+        if (dimsA[0] % 2 == 1 || dimsA[1] % 2 == 1 || dimsB[1] % 2 == 1){
+            result = result.ExtendToDivisibleBy2();
+            A_div2 = A_div2.ExtendToDivisibleBy2();
+            B_div2 = B_div2.ExtendToDivisibleBy2();
+        }
+        
+
+        Tensor<T, 2> A11 = A_div2.LeftTopPart();
+        Tensor<T, 2> A12 = A_div2.RightTopPart();
+        Tensor<T, 2> A21 = A_div2.LeftBottomPart();
+        Tensor<T, 2> A22 = A_div2.RightBottomPart();
+        Tensor<T, 2> B11 = B_div2.LeftTopPart();
+        Tensor<T, 2> B12 = B_div2.RightTopPart();
+        Tensor<T, 2> B21 = B_div2.LeftBottomPart();
+        Tensor<T, 2> B22 = B_div2.RightBottomPart();
 
         
         // Compute M1 to M7
@@ -130,6 +139,7 @@ namespace TensorMatmul {
         result.FillLeftBottomPart(C21);
         result.FillRightBottomPart(C22);
 
+        result = result.CutToDimensions(M_dim, K_dim);
         return result;
     }
 };

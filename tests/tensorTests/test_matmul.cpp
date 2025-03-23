@@ -222,6 +222,8 @@ TEST(TensorSumTest, TestMatmulAlgorithmEven) {
     auto B = TensorOps::full<float, 2>(dimsB, 2.0f);
     auto C = TensorMatmul::matmul2d<float>(A, B);
 
+    EXPECT_EQ(C.getDimensions()[0], N);
+    EXPECT_EQ(C.getDimensions()[1], K);
     EXPECT_FLOAT_EQ(C(0, 0), 1020.0f);
     EXPECT_FLOAT_EQ(C(10, 10), 1020.0f);
     EXPECT_FLOAT_EQ(C(110, 110), 1020.0f);
