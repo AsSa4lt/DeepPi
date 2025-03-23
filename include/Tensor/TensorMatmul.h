@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdint>
 #include <array>
+#include <future>
 
 namespace TensorMatmul {
     /**
@@ -62,6 +63,7 @@ namespace TensorMatmul {
         return result;
      }
 
+     
     /**
      * @brief Computes the matrix product of two single-precision floating point two-dimensional tensors using SIMD operations
      *
@@ -71,16 +73,19 @@ namespace TensorMatmul {
      */
      Tensor<float, 2> naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B);
 
+
+
+     
     /**
      * @brief Computes the matrix product of two two-dimensional tensors with unknown type
-     * It's a fallback implementation when we don't know which SIMD operations to use
+     * It's just a wrapper for a real function
      *
      * @param A First input tensor of type Tensor<T, 2>
      * @param B Second input tensor of type Tensor<T, 2>
      * @return The matrix multiplication product as a Tensor<T, 2> value
      */
     template <typename T>
-    Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B) {
+    Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B, int level = 0) {
         static_assert(std::is_same<T, float>::value, "DeepPi only supports float currently.");
         const auto& dimsA = A.getDimensions();
         const auto& dimsB = B.getDimensions();
@@ -119,27 +124,62 @@ namespace TensorMatmul {
 
         
         // Compute M1 to M7
-        Tensor<T, 2> M1 = matmul2d(A11 + A22, B11 + B22);
-        Tensor<T, 2> M2 = matmul2d(A21 + A22, B11);
-        Tensor<T, 2> M3 = matmul2d(A11, B12 - B22);
-        Tensor<T, 2> M4 = matmul2d(A22, B21 - B11);
-        Tensor<T, 2> M5 = matmul2d(A11 + A12, B22);
-        Tensor<T, 2> M6 = matmul2d(A21 - A11, B11 + B12);
-        Tensor<T, 2> M7 = matmul2d(A12 - A22, B21 + B22);
+        if (level == 0){
+            auto futureM1 = std::async(std::launch::async, [&]() { return matmul2d(A11 + A22, B11 + B22, level++); });
+            auto futureM2 = std::async(std::launch::async, [&]() { return matmul2d(A21 + A22, B11, level++); });
+            auto futureM3 = std::async(std::launch::async, [&]() { return matmul2d(A11, B12 - B22, level++); });
+            auto futureM4 = std::async(std::launch::async, [&]() { return matmul2d(A22, B21 - B11, level++); });
+            auto futureM5 = std::async(std::launch::async, [&]() { return matmul2d(A11 + A12, B22, level++); });
+            auto futureM6 = std::async(std::launch::async, [&]() { return matmul2d(A21 - A11, B11 + B12, level++); });
+            auto futureM7 = std::async(std::launch::async, [&]() { return matmul2d(A12 - A22, B21 + B22, level++); });
+        
+            // Get the results from the futures
+            Tensor<T, 2> M1 = futureM1.get();
+            Tensor<T, 2> M2 = futureM2.get();
+            Tensor<T, 2> M3 = futureM3.get();
+            Tensor<T, 2> M4 = futureM4.get();
+            Tensor<T, 2> M5 = futureM5.get();
+            Tensor<T, 2> M6 = futureM6.get();
+            Tensor<T, 2> M7 = futureM7.get();
 
-        // Compute final submatrices of the result
-        Tensor<T, 2> C11 = M1 + M4 - M5 + M7;
-        Tensor<T, 2> C12 = M3 + M5;
-        Tensor<T, 2> C21 = M2 + M4;
-        Tensor<T, 2> C22 = M1 - M2 + M3 + M6;
+            // Compute final submatrices of the result
+            Tensor<T, 2> C11 = M1 + M4 - M5 + M7;
+            Tensor<T, 2> C12 = M3 + M5;
+            Tensor<T, 2> C21 = M2 + M4;
+            Tensor<T, 2> C22 = M1 - M2 + M3 + M6;
 
-        // Combine the submatrices into the final result
-        result.FillLeftTopPart(C11);
-        result.FillRightTopPart(C12);
-        result.FillLeftBottomPart(C21);
-        result.FillRightBottomPart(C22);
+            // Combine the submatrices into the final result
+            result.FillLeftTopPart(C11);
+            result.FillRightTopPart(C12);
+            result.FillLeftBottomPart(C21);
+            result.FillRightBottomPart(C22);
 
-        result = result.CutToDimensions(M_dim, K_dim);
-        return result;
+            result = result.CutToDimensions(M_dim, K_dim);
+            return result;
+        }else {
+            // Compute M1 to M7
+            Tensor<T, 2> M1 = matmul2d(A11 + A22, B11 + B22, level++);
+            Tensor<T, 2> M2 = matmul2d(A21 + A22, B11, level++);
+            Tensor<T, 2> M3 = matmul2d(A11, B12 - B22, level++);
+            Tensor<T, 2> M4 = matmul2d(A22, B21 - B11, level++);
+            Tensor<T, 2> M5 = matmul2d(A11 + A12, B22, level++);
+            Tensor<T, 2> M6 = matmul2d(A21 - A11, B11 + B12, level++);
+            Tensor<T, 2> M7 = matmul2d(A12 - A22, B21 + B22, level++);
+
+            // Compute final submatrices of the result
+            Tensor<T, 2> C11 = M1 + M4 - M5 + M7;
+            Tensor<T, 2> C12 = M3 + M5;
+            Tensor<T, 2> C21 = M2 + M4;
+            Tensor<T, 2> C22 = M1 - M2 + M3 + M6;
+
+            // Combine the submatrices into the final result
+            result.FillLeftTopPart(C11);
+            result.FillRightTopPart(C12);
+            result.FillLeftBottomPart(C21);
+            result.FillRightBottomPart(C22);
+
+            result = result.CutToDimensions(M_dim, K_dim);
+            return result;
+        }
     }
 };
