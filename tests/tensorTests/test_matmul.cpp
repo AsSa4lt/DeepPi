@@ -109,7 +109,7 @@ TEST(MatmulTests, Matmul2DWrongDimenstion){
     auto B = TensorOps::full<float, 2>(dimsB, 23.0f);
     EXPECT_DEATH({
         TensorMatmul::matmul2d(A, B);
-    }, "must have shapes");
+    }, "need to have shapes");
 }
 
 TEST(MatmulTests, MatmullCallVectorsMainFunc){

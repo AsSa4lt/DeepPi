@@ -31,7 +31,7 @@ namespace TensorMatmul {
      * @param B Second input tensor of type Tensor<uint16_t, 1>
      * @return The dot product as a uint32_t value
      */
-     uint32_t dotproduct(const Tensor<uint16_t, 1> &A, const Tensor<uint16_t, 1> &B);
+    uint32_t dotproduct(const Tensor<uint16_t, 1> &A, const Tensor<uint16_t, 1> &B);
     
     /**
      * @brief Computes the dot product of two 8-bit unsigned integer tensors tensors using SIMD operations
@@ -40,7 +40,7 @@ namespace TensorMatmul {
      * @param B Second input tensor of type Tensor<uint8_t, 1>
      * @return The dot product as a uint32_t value
      */
-     uint32_t dotproduct(const Tensor<uint8_t, 1>  &A, const Tensor<uint8_t, 1>  &B);
+    uint32_t dotproduct(const Tensor<uint8_t, 1>  &A, const Tensor<uint8_t, 1>  &B);
 
 
     /**
@@ -52,7 +52,7 @@ namespace TensorMatmul {
      * @return The dot product as a T value
      */
      template <typename T>
-     T dotproduct(const Tensor<T, 1>  &A, const Tensor<T, 1>  &B){
+    T dotproduct(const Tensor<T, 1>  &A, const Tensor<T, 1>  &B){
         // Check that A and B have the same size
         assert(A.Data.size() == B.Data.size() && "Vectors must have the same dimensions");
         T result = 0; // Initialize the result to zero
@@ -61,7 +61,7 @@ namespace TensorMatmul {
             result += A(i) * B(i);  
         }
         return result;
-     }
+    }
 
      
     /**
@@ -71,25 +71,20 @@ namespace TensorMatmul {
      * @param B Second input tensor of type Tensor<float, 2>
      * @return The matrix multiplication product as a Tensor<float, 2> value
      */
-     Tensor<float, 2> naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B);
+    Tensor<float, 2> naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B);
 
 
-
-     
     /**
-     * @brief Computes the matrix product of two two-dimensional tensors with unknown type
-     * It's just a wrapper for a real function
-     *
+     * @brief Internal function for matrix multiplications using impoved Strassen algorithm
+     * 
      * @param A First input tensor of type Tensor<T, 2>
      * @param B Second input tensor of type Tensor<T, 2>
      * @return The matrix multiplication product as a Tensor<T, 2> value
      */
     template <typename T>
-    Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B, int level = 0) {
-        static_assert(std::is_same<T, float>::value, "DeepPi only supports float currently.");
+    Tensor<T, 2> matmul2dStrassen(const Tensor<T, 2>& A, const Tensor<T, 2>& B, int level){
         const auto& dimsA = A.getDimensions();
         const auto& dimsB = B.getDimensions();
-        assert(dimsA[1] == dimsB[0] && "For 2D matrix multiplication, matrices must have shapes MxN and NxK");
         uint32_t M_dim = dimsA[0];
         uint32_t N_dim = dimsA[1];
         uint32_t K_dim = dimsB[1];
@@ -125,13 +120,13 @@ namespace TensorMatmul {
         
         // Compute M1 to M7
         if (level == 0){
-            auto futureM1 = std::async(std::launch::async, [&]() { return matmul2d(A11 + A22, B11 + B22, level++); });
-            auto futureM2 = std::async(std::launch::async, [&]() { return matmul2d(A21 + A22, B11, level++); });
-            auto futureM3 = std::async(std::launch::async, [&]() { return matmul2d(A11, B12 - B22, level++); });
-            auto futureM4 = std::async(std::launch::async, [&]() { return matmul2d(A22, B21 - B11, level++); });
-            auto futureM5 = std::async(std::launch::async, [&]() { return matmul2d(A11 + A12, B22, level++); });
-            auto futureM6 = std::async(std::launch::async, [&]() { return matmul2d(A21 - A11, B11 + B12, level++); });
-            auto futureM7 = std::async(std::launch::async, [&]() { return matmul2d(A12 - A22, B21 + B22, level++); });
+            auto futureM1 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A11 + A22, B11 + B22, level++); });
+            auto futureM2 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A21 + A22, B11, level++); });
+            auto futureM3 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A11, B12 - B22, level++); });
+            auto futureM4 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A22, B21 - B11, level++); });
+            auto futureM5 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A11 + A12, B22, level++); });
+            auto futureM6 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A21 - A11, B11 + B12, level++); });
+            auto futureM7 = std::async(std::launch::async, [&]() { return matmul2dStrassen(A12 - A22, B21 + B22, level++); });
         
             // Get the results from the futures
             Tensor<T, 2> M1 = futureM1.get();
@@ -158,13 +153,13 @@ namespace TensorMatmul {
             return result;
         }else {
             // Compute M1 to M7
-            Tensor<T, 2> M1 = matmul2d(A11 + A22, B11 + B22, level++);
-            Tensor<T, 2> M2 = matmul2d(A21 + A22, B11, level++);
-            Tensor<T, 2> M3 = matmul2d(A11, B12 - B22, level++);
-            Tensor<T, 2> M4 = matmul2d(A22, B21 - B11, level++);
-            Tensor<T, 2> M5 = matmul2d(A11 + A12, B22, level++);
-            Tensor<T, 2> M6 = matmul2d(A21 - A11, B11 + B12, level++);
-            Tensor<T, 2> M7 = matmul2d(A12 - A22, B21 + B22, level++);
+            Tensor<T, 2> M1 = matmul2dStrassen(A11 + A22, B11 + B22, level++);
+            Tensor<T, 2> M2 = matmul2dStrassen(A21 + A22, B11, level++);
+            Tensor<T, 2> M3 = matmul2dStrassen(A11, B12 - B22, level++);
+            Tensor<T, 2> M4 = matmul2dStrassen(A22, B21 - B11, level++);
+            Tensor<T, 2> M5 = matmul2dStrassen(A11 + A12, B22, level++);
+            Tensor<T, 2> M6 = matmul2dStrassen(A21 - A11, B11 + B12, level++);
+            Tensor<T, 2> M7 = matmul2dStrassen(A12 - A22, B21 + B22, level++);
 
             // Compute final submatrices of the result
             Tensor<T, 2> C11 = M1 + M4 - M5 + M7;
@@ -181,5 +176,19 @@ namespace TensorMatmul {
             result = result.CutToDimensions(M_dim, K_dim);
             return result;
         }
+    }
+     
+    /**
+     * @brief Computes the matrix product of two two-dimensional tensors with unknown type
+     * It's just a wrapper for a real function
+     *
+     * @param A First input tensor of type Tensor<T, 2>
+     * @param B Second input tensor of type Tensor<T, 2>
+     * @return The matrix multiplication product as a Tensor<T, 2> value
+     */
+    template <typename T>
+    Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B) {
+        static_assert(std::is_same<T, float>::value, "DeepPi only supports float currently.");
+        return matmul2dStrassen(A, B, 0);
     }
 };
