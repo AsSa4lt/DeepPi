@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <array>
 #include <iostream>
+#include <sys/types.h>
 #include <vector>
 #include <stdexcept>
 #include "Tensor/TensorOps.h"
@@ -195,7 +196,7 @@ TEST(TensorSumTest, MatmulPerformanceTestFloat) {
     std::cout << "Performance is " << N * M * K / duration.count() / 1e6 << " GFLOPs" << std::endl;
 }
 
-TEST(TensorSumTest, TestMatmulAlgorithm) {
+TEST(TensorSumTest, TestMatmulAlgorithmFloat32) {
     uint32_t N = 128;
     uint32_t M = 1024;
     uint32_t K = 2048;
@@ -211,7 +212,7 @@ TEST(TensorSumTest, TestMatmulAlgorithm) {
     EXPECT_FLOAT_EQ(C(110, 110), 4096.0f);
 }
 
-TEST(TensorSumTest, TestMatmulAlgorithmEven) {
+TEST(TensorSumTest, TestMatmulAlgorithmEvenFloat32) {
     uint32_t N = 131;
     uint32_t M = 255;
     uint32_t K = 666;
@@ -227,4 +228,39 @@ TEST(TensorSumTest, TestMatmulAlgorithmEven) {
     EXPECT_FLOAT_EQ(C(0, 0), 1020.0f);
     EXPECT_FLOAT_EQ(C(10, 10), 1020.0f);
     EXPECT_FLOAT_EQ(C(110, 110), 1020.0f);
+}
+
+TEST(TensorSumTest, TestMatmulAlgorithmUint32) {
+    uint32_t N = 128;
+    uint32_t M = 1024;
+    uint32_t K = 2048;
+    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
+    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+
+    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2.0f);
+    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2.0f);
+    auto C = TensorMatmul::matmul2d<uint32_t>(A, B);
+
+    EXPECT_EQ(C(0, 0), 4096);
+    EXPECT_EQ(C(10, 10), 4096);
+    EXPECT_EQ(C(110, 110), 4096);
+}
+
+
+TEST(TensorSumTest, TestMatmulAlgorithmEvenUint32) {
+    uint32_t N = 131;
+    uint32_t M = 255;
+    uint32_t K = 666;
+    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
+    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+
+    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2.0f);
+    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2.0f);
+    auto C = TensorMatmul::matmul2d<uint32_t>(A, B);
+
+    EXPECT_EQ(C.getDimensions()[0], N);
+    EXPECT_EQ(C.getDimensions()[1], K);
+    EXPECT_EQ(C(0, 0), 1020);
+    EXPECT_EQ(C(10, 10), 1020);
+    EXPECT_EQ(C(110, 110), 1020);
 }

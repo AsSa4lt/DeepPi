@@ -148,3 +148,41 @@ Tensor<float, 2> TensorMatmul::naivematmul2d(const Tensor<float, 2>& A, const Te
     }
     return result;
 }
+
+Tensor<uint32_t, 2> TensorMatmul::naivematmul2d(const Tensor<uint32_t, 2>& A, const Tensor<uint32_t, 2>& B){
+    const auto& dimsA = A.getDimensions();
+    const auto& dimsB = B.getDimensions();
+    assert(dimsA[1] == dimsB[0] && "For 2D matrix multiplication matrices need to have shapes M*N and N*K");
+    uint32_t M_dim = dimsA[0];
+    uint32_t N_dim = dimsA[1];
+    uint32_t K_dim = dimsB[1];
+    std::array<uint32_t, 2> dims = {M_dim, K_dim};
+    Tensor<uint32_t, 2> result(dims); 
+    for(int i = 0; i < M_dim; i++){
+        int j = 0;
+        for(; j+3 < K_dim; j+=4){ 
+            // Initialize sum vector for 4 elements of row i of C
+            uint32x4_t sum = vdupq_n_u32(0.0f);
+            for(int k = 0; k < N_dim; k++){
+                // Load A(i,k) and broadcast it into a vector.
+                uint32_t a_val = A(i, k);
+                uint32x4_t a_vec = vdupq_n_u32(a_val);
+                // Load 4 contiguous floats from row k of B, starting at column j.
+                // Since B is row-major, row k starts at index k*K.
+                uint32x4_t b_vec = vld1q_u32(&B(k,j));
+                // Accumulate: sum += a_vec * b_vec
+                sum = vmlaq_u32(sum, a_vec, b_vec);
+            }
+            // Store the computed 4 floats back into matrixC
+            vst1q_u32(&result(i, j), sum);
+        }
+        for(; j < K_dim; j+=1){
+            uint32_t sum = 0;
+            for(int k = 0; k < N_dim; k++){
+                sum += A(i,k) * B(k, j);
+            }
+            result(i, j) = sum;
+        }
+    }
+    return result;
+}

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <future>
+#include <type_traits>
 
 namespace TensorMatmul {
     /**
@@ -73,6 +74,14 @@ namespace TensorMatmul {
      */
     Tensor<float, 2> naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B);
 
+    /**
+     * @brief Computes the matrix product of two single-precision floating point two-dimensional tensors using SIMD operations
+     *
+     * @param A First input tensor of type Tensor<float, 2>
+     * @param B Second input tensor of type Tensor<float, 2>
+     * @return The matrix multiplication product as a Tensor<float, 2> value
+     */
+    Tensor<uint32_t, 2> naivematmul2d(const Tensor<uint32_t, 2>& A, const Tensor<uint32_t, 2>& B);
 
     /**
      * @brief Internal function for matrix multiplications using impoved Strassen algorithm
@@ -188,7 +197,7 @@ namespace TensorMatmul {
      */
     template <typename T>
     Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B) {
-        static_assert(std::is_same<T, float>::value, "DeepPi only supports float currently.");
+        static_assert(std::is_same<T, float>::value || std::is_same_v<T, uint32_t>, "DeepPi only supports float and uint currently.");
         return matmul2dStrassen(A, B, 0);
     }
 };
