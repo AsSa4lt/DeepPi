@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <array>
@@ -175,9 +176,9 @@ TEST(MatmulTests, MatmullCall2DMatricesMainFunc){
 }
 
 TEST(TensorSumTest, MatmulPerformanceTestFloat) {
-    uint32_t N = 128;
+    uint32_t N = 1024;
     uint32_t M = 1024;
-    uint32_t K = 2048;
+    uint32_t K = 1024;
     std::array<uint32_t, 2> dimsA = {N, M};
     std::array<uint32_t, 2> dimsB = {M, K};
 
@@ -190,9 +191,9 @@ TEST(TensorSumTest, MatmulPerformanceTestFloat) {
         Tensor<float, 2> C = TensorOps::matmul(A, B);
     }
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>((end - start) / num_iterations);
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>((end - start) / num_iterations);
     
-    std::cout << "Tensor multiplication performance test took " << duration.count() << " ms" << std::endl;
+    std::cout << "Tensor multiplication performance test took " << duration.count() << " us" << std::endl;
     std::cout << "Performance is " << N * M * K / duration.count() / 1e6 << " GFLOPs" << std::endl;
 }
 
