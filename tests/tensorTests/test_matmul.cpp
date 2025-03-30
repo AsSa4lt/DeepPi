@@ -178,8 +178,8 @@ TEST(TensorSumTest, MatmulPerformanceTestFloat) {
     uint32_t N = 128;
     uint32_t M = 1024;
     uint32_t K = 2048;
-    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
-    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
 
     auto A = TensorOps::full<float, 2>(dimsA, 11.0f);
     auto B = TensorOps::full<float, 2>(dimsB, 23.0f);
@@ -200,8 +200,8 @@ TEST(TensorSumTest, TestMatmulAlgorithmFloat32) {
     uint32_t N = 128;
     uint32_t M = 1024;
     uint32_t K = 2048;
-    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
-    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
 
     auto A = TensorOps::full<float, 2>(dimsA, 2.0f);
     auto B = TensorOps::full<float, 2>(dimsB, 2.0f);
@@ -216,8 +216,8 @@ TEST(TensorSumTest, TestMatmulAlgorithmEvenFloat32) {
     uint32_t N = 131;
     uint32_t M = 255;
     uint32_t K = 666;
-    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
-    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
 
     auto A = TensorOps::full<float, 2>(dimsA, 2.0f);
     auto B = TensorOps::full<float, 2>(dimsB, 2.0f);
@@ -234,11 +234,11 @@ TEST(TensorSumTest, TestMatmulAlgorithmUint32) {
     uint32_t N = 128;
     uint32_t M = 1024;
     uint32_t K = 2048;
-    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
-    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
 
-    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2.0f);
-    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2.0f);
+    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2);
+    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2);
     auto C = TensorMatmul::matmul2d<uint32_t>(A, B);
 
     EXPECT_EQ(C(0, 0), 4096);
@@ -251,11 +251,11 @@ TEST(TensorSumTest, TestMatmulAlgorithmEvenUint32) {
     uint32_t N = 131;
     uint32_t M = 255;
     uint32_t K = 666;
-    std::array<uint32_t, 2> dimsA = {N, M};  // Large tensor
-    std::array<uint32_t, 2> dimsB = {M, K};  // Large tensor
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
 
-    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2.0f);
-    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2.0f);
+    auto A = TensorOps::full<uint32_t, 2>(dimsA, 2);
+    auto B = TensorOps::full<uint32_t, 2>(dimsB, 2);
     auto C = TensorMatmul::matmul2d<uint32_t>(A, B);
 
     EXPECT_EQ(C.getDimensions()[0], N);
@@ -263,4 +263,74 @@ TEST(TensorSumTest, TestMatmulAlgorithmEvenUint32) {
     EXPECT_EQ(C(0, 0), 1020);
     EXPECT_EQ(C(10, 10), 1020);
     EXPECT_EQ(C(110, 110), 1020);
+}
+
+TEST(TensorSumTest, TestMatmulAlgorithmUint16) {
+    uint32_t N = 128;
+    uint32_t M = 1024;
+    uint32_t K = 2048;
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
+
+    auto A = TensorOps::full<uint16_t, 2>(dimsA, 2);
+    auto B = TensorOps::full<uint16_t, 2>(dimsB, 2);
+    auto C = TensorMatmul::matmul2d<uint16_t>(A, B);
+
+    EXPECT_EQ(C(0, 0), 4096);
+    EXPECT_EQ(C(10, 10), 4096);
+    EXPECT_EQ(C(110, 110), 4096);
+}
+
+
+TEST(TensorSumTest, TestMatmulAlgorithmEvenUint16) {
+    uint32_t N = 131;
+    uint32_t M = 255;
+    uint32_t K = 666;
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
+
+    auto A = TensorOps::full<uint16_t, 2>(dimsA, 2);
+    auto B = TensorOps::full<uint16_t, 2>(dimsB, 2);
+    auto C = TensorMatmul::matmul2d<uint16_t>(A, B);
+
+    EXPECT_EQ(C.getDimensions()[0], N);
+    EXPECT_EQ(C.getDimensions()[1], K);
+    EXPECT_EQ(C(0, 0), 1020);
+    EXPECT_EQ(C(10, 10), 1020);
+    EXPECT_EQ(C(110, 110), 1020);
+}
+
+TEST(TensorSumTest, TestMatmulAlgorithmUint8) {
+    uint32_t N = 64;
+    uint32_t M = 128;
+    uint32_t K = 1024;
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
+
+    auto A = TensorOps::full<uint8_t, 2>(dimsA, 1);
+    auto B = TensorOps::full<uint8_t, 2>(dimsB, 1);
+    auto C = TensorMatmul::matmul2d<uint8_t>(A, B);
+
+    EXPECT_EQ(C(0, 0), 128);
+    EXPECT_EQ(C(10, 10), 128);
+    EXPECT_EQ(C(30, 110), 128);
+}
+
+
+TEST(TensorSumTest, TestMatmulAlgorithmEvenUint8) {
+    uint32_t N = 31;
+    uint32_t M = 123;
+    uint32_t K = 145;
+    std::array<uint32_t, 2> dimsA = {N, M};
+    std::array<uint32_t, 2> dimsB = {M, K};
+
+    auto A = TensorOps::full<uint8_t, 2>(dimsA, 1);
+    auto B = TensorOps::full<uint8_t, 2>(dimsB, 1);
+    auto C = TensorMatmul::matmul2d<uint8_t>(A, B);
+
+    EXPECT_EQ(C.getDimensions()[0], N);
+    EXPECT_EQ(C.getDimensions()[1], K);
+    EXPECT_EQ(C(0, 0), 123);
+    EXPECT_EQ(C(10, 10), 123);
+    EXPECT_EQ(C(30, 110), 123);
 }

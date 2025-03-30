@@ -75,13 +75,64 @@ namespace TensorMatmul {
     Tensor<float, 2> naivematmul2d(const Tensor<float, 2>& A, const Tensor<float, 2>& B);
 
     /**
-     * @brief Computes the matrix product of two single-precision floating point two-dimensional tensors using SIMD operations
+     * @brief Computes the matrix product of two uint32+t two-dimensional tensors using SIMD operations
      *
-     * @param A First input tensor of type Tensor<float, 2>
-     * @param B Second input tensor of type Tensor<float, 2>
-     * @return The matrix multiplication product as a Tensor<float, 2> value
+     * @param A First input tensor of type Tensor<uint32_t, 2>
+     * @param B Second input tensor of type Tensor<uint32_t, 2>
+     * @return The matrix multiplication product as a Tensor<uint32_t, 2> value
      */
     Tensor<uint32_t, 2> naivematmul2d(const Tensor<uint32_t, 2>& A, const Tensor<uint32_t, 2>& B);
+
+    /**
+     * @brief Computes the matrix product of two uint16_t two-dimensional tensors using SIMD operations
+     *
+     * @param A First input tensor of type Tensor<uint16_t, 2>
+     * @param B Second input tensor of type Tensor<uint16_t, 2>
+     * @return The matrix multiplication product as a Tensor<uint16_t, 2> value
+     */
+    Tensor<uint16_t, 2> naivematmul2d(const Tensor<uint16_t, 2>& A, const Tensor<uint16_t, 2>& B);
+
+    /**
+     * @brief Computes the matrix product of two uint8_t two-dimensional tensors using SIMD operations
+     *
+     * @param A First input tensor of type Tensor<uint8_t, 2>
+     * @param B Second input tensor of type Tensor<uint8_t, 2>
+     * @return The matrix multiplication product as a Tensor<uint8_t, 2> value
+     */
+    Tensor<uint8_t, 2> naivematmul2d(const Tensor<uint8_t, 2>& A, const Tensor<uint8_t, 2>& B);
+
+
+   
+    /**
+     * @brief Fallback implementation for the matrix product of two  two-dimensional tensors using SIMD operations
+     *
+     * @param A First input tensor of type Tensor<T, 2>
+     * @param B Second input tensor of type Tensor<T, 2>
+     * @return The matrix multiplication product as a Tensor<T, 2> value
+     */
+    template <typename T>
+    Tensor<T, 2> naivematmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B){
+        const auto& dimsA = A.getDimensions();
+        const auto& dimsB = B.getDimensions();
+        assert(dimsA[1] == dimsB[0] && "For 2D matrix multiplication matrices need to have shapes M*N and N*K");
+        uint32_t M_dim = dimsA[0];
+        uint32_t N_dim = dimsA[1];
+        uint32_t K_dim = dimsB[1];
+        std::array<uint32_t, 2> dims = {M_dim, K_dim};
+        Tensor<T, 2> result(dims); 
+        for(int i = 0; i < M_dim; i++){
+
+            for(int j = 0; j < K_dim; j+=1){
+                uint8_t sum = 0;
+                for(int k = 0; k < N_dim; k++){
+                    sum += A(i,k) * B(k, j);
+                }
+                result(i, j) = sum;
+            }
+        }
+        return result;
+    }
+
 
     /**
      * @brief Internal function for matrix multiplications using impoved Strassen algorithm
@@ -197,7 +248,6 @@ namespace TensorMatmul {
      */
     template <typename T>
     Tensor<T, 2> matmul2d(const Tensor<T, 2>& A, const Tensor<T, 2>& B) {
-        static_assert(std::is_same<T, float>::value || std::is_same_v<T, uint32_t>, "DeepPi only supports float and uint currently.");
         return matmul2dStrassen(A, B, 0);
     }
 };
