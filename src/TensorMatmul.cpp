@@ -68,7 +68,7 @@ uint32_t TensorMatmul::dotproduct(const Tensor<uint16_t, 1> &A, const Tensor<uin
         // Load 8 elements from tensor A and tensor B
         uint16x8_t a = vld1q_u16(&A(i));
         uint16x8_t b = vld1q_u16(&B(i));
-        uint16x8_t prod = vmulq_u32(a, b);
+        uint16x8_t prod = vmulq_u16(a, b);
         // Perform a horizontal addition to sum the 8 values in the prod vector
         // Add the low and high parts
         uint16x4_t sum = vadd_u16(vget_low_u16(prod), vget_high_u16(prod));  
