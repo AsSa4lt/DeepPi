@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 project(DeepPi VERSION 0.1.0)
 
 # Set the C++ standard.
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_EXTENSIONS ON) 
 
 # Define include directories
@@ -61,7 +58,7 @@ add_executable(test_tensors tests/tensorTests/test_access.cpp
                             tests/tensorTests/test_matmul.cpp)
 
 # Add sources
-target_sources(test_tensors PUBLIC src/TensorMatmul.cpp)
+target_sources(test_tensors PUBLIC src/TensorMatmul.cpp src/Tensor.cpp)
 
 # Add compile options
 target_compile_options(test_tensors PUBLIC -O3)
